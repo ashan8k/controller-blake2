@@ -50,8 +50,10 @@ module controller # 	(
 //===============================================================================
 // Internal registers and local parameters
 			
-			reg 		[stack_depth-1:0] pointr [$clog2(1024/proc_bus_width) -1 :0];
-			reg 		[1023:0] stack [0:stack_depth-1];
+//			reg 		[stack_depth-1:0] pointr [$clog2(1024/proc_bus_width) -1 :0];
+			reg 		[1:0] pointr [3:0];
+//			reg 		[1023:0] stack [0:stack_depth-1];
+			reg 		[1023:0] stack [0:1];
 			
 			reg 		[1:0]controller_state;
 		
@@ -67,23 +69,50 @@ module controller # 	(
       					if (!reset_n)
         					begin
 							controller_state<= idle;
-							pointr		<= 0;
+							pointr[*][*] 	<= 0;
 							stack		<= 0;
 						end
 					else
 						begin: state_diagram
 							case(controller_state)
+
 							idle 	    : 	if (valid_in && !new_hash_request)
-											begin
-												controller_state
-												stack[]
-											end
-							read_stack  : 	if ()
-											begin
-											end
-							write_stack : 	if () 
-											begin
-											end
+										begin
+											controller_state <= write_stack;
+										end
+									else if (!valid_in && new_hash_request && hash_ready)
+										begin
+											controller_state <= read_stack;
+										end
+									else
+										begin
+											controller_state <= idle;
+										end
+										
+
+							read_stack  : 	if (valid_in && !new_hash_request)
+										begin
+											controller_state <= write_stack;
+										end
+									else
+										begin
+											controller_state <= idle;
+										end
+
+
+							write_stack : 	if (valid_in && !new_hash_request)
+										begin
+											controller_state <= write_stack;
+										end
+									else if (!valid_in && new_hash_request && hash_ready)
+										begin
+											controller_state <= read_stack;
+										end
+									else
+										begin
+											controller_state <= idle;
+										end
+							endcase
 
 						end
 				end
