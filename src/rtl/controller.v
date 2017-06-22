@@ -17,7 +17,6 @@ module controller # 	(
 
 			(
 //===============================================================================
-
 			input wire	clk,
 			input wire	reset_n,			
 
@@ -25,7 +24,7 @@ module controller # 	(
 // Processor related ports  
 
 			input wire 	[proc_bus_width-1:0] data_in,
-			input wire  	valid_in,
+			input wire  valid_in,
 			input wire	new_hash_request,
 			
 			output wire	stop_sending,
@@ -36,14 +35,14 @@ module controller # 	(
 
 			output wire	init,
 			output wire	next,
-			output wire 	final_block,				
+			output wire final_block,				
 			output wire	[1023:0] block,		// Hardcoded value in blake2
-			output wire 	[127:0] data_length,	// Hardcoded value in blake2
+			output wire [127:0] data_length,// Hardcoded value in blake2
 
 			input wire 	hash_ready,
 
 			input wire 	[511 : 0] digest,	// Hardcoded value in blake2 // Right now nothing to do with this
-                   	input wire      digest_valid		// Right now nothing to do with this
+			input wire 	digest_valid		// Right now nothing to do with this
 
 		     );
 
@@ -76,42 +75,44 @@ module controller # 	(
 						begin: state_diagram
 							case(controller_state)
 
-							idle 	    : 	if (valid_in && !new_hash_request)
-										begin
-											controller_state <= write_stack;
-										end
-									else if (!valid_in && new_hash_request && hash_ready)
-										begin
-											controller_state <= read_stack;
-										end
-									else
-										begin
-											controller_state <= idle;
-										end
-										
+							idle: 	
+								if (valid_in && !new_hash_request)
+									begin
+										controller_state <= write_stack;
+									end
+								else if (!valid_in && new_hash_request && hash_ready)
+									begin
+										controller_state <= read_stack;
+									end
+								else
+									begin
+										controller_state <= idle;
+									end
+									
 
-							read_stack  : 	if (valid_in && !new_hash_request)
-										begin
-											controller_state <= write_stack;
-										end
-									else
-										begin
-											controller_state <= idle;
-										end
-
-
-							write_stack : 	if (valid_in && !new_hash_request)
-										begin
-											controller_state <= write_stack;
-										end
-									else if (!valid_in && new_hash_request && hash_ready)
-										begin
-											controller_state <= read_stack;
-										end
-									else
-										begin
-											controller_state <= idle;
-										end
+							read_stack:
+								if (valid_in && !new_hash_request)
+									begin
+										controller_state <= write_stack;
+									end
+								else
+									begin
+										controller_state <= idle;
+									end
+								
+							write_stack: 	
+								if (valid_in && !new_hash_request)
+									begin
+										controller_state <= write_stack;
+									end
+								else if (!valid_in && new_hash_request && hash_ready)
+									begin
+										controller_state <= read_stack;
+									end
+								else
+									begin
+										controller_state <= idle;
+									end
 							endcase
 
 						end
