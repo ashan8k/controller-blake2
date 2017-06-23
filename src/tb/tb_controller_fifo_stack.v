@@ -1,9 +1,9 @@
 //`timescale 1ns/ 10ps
 
 module test_bench_controller_fifo_stack # (
-	parameter 	abits = 3,
+	parameter 	abits = 4,
 	parameter 	dbits = 2,
-	parameter	rd_pkt = 2)();
+	parameter	rd_pkt = 4)();
     
 	reg		clk;
 	reg 	reset_n;
@@ -21,58 +21,126 @@ initial begin
   	wr = 'x;
 	rd = 'x;
 	din= 1;
-	
+// reset system	
   	#10 
   	reset_n = 0;    
   	#20 
 	reset_n = 1;
-	rd = 1;
 	#10
-	din=1;
-	wr=1;
-	rd=0;
-	#10
-	din=1;
-	wr=0;
-	rd=1;
-	#40
+// wring data until full
+	wr =1;
+	#20
 	din=2;
-	wr=1;
-	rd=0;
-	#10
+	#20
 	din=3;
-	wr=1;
-	rd=0;
+	#20
+	din=2;
+	#20
+	din=3;
+	#20
+	din=2;
 	#20
 	din=1;
-	wr=1;
-	rd=0;
-	#100
-	din=5;
-	wr=0;
-	rd=1;
-	#10
-	din=3;
-	wr=0;
-	rd=1;
-	#40
-	din=4;
-	wr=1;
-	rd=0;
-	#10
-	din=5;
-	wr=1;
-	rd=0;
 	#20
-	din=6;
-	wr=1;
-	rd=0;
-	#40
-	din=4;
-	wr=1;
+	din=2;
+	#20
+	din=1;
+	#20
+	din=2;
+	#20
+
+// read until empty
+	wr=0;
 	rd=1;
-	
-	
+	#50
+	rd=0;
+// normal write and read operations
+
+	wr =1;
+	#20
+	din=2;
+	#20
+	wr =3;
+	#20
+	din=2;
+	#20
+
+	wr=0;
+	rd=1;
+	#40
+	rd=0;
+//  write and read with overschoot
+ 	wr =1;
+	#50
+	din=1;
+	#20
+	wr =0;
+	rd =1;
+	#30
+	wr =1;
+	rd =0;
+	#20
+	din=2;
+	#20
+	wr =3;
+	#20
+	din=3;
+
+
+
+//
+//	
+//  	#10 
+//  	reset_n = 0;    
+//  	#20 
+//	reset_n = 1;
+//	rd = 1;
+//	#10
+//	din=1;
+//	wr=1;
+//	rd=0;
+//	#10
+//	din=1;
+//	wr=0;
+//	rd=1;
+//	#40
+//	din=2;
+//	wr=1;
+//	rd=0;
+//	#10
+//	din=3;
+//	wr=1;
+//	rd=0;
+//	#20
+//	din=1;
+//	wr=1;
+//	rd=0;
+//	#100
+//	din=5;
+//	wr=0;
+//	rd=1;
+//	#10
+//	din=3;
+//	wr=0;
+//	rd=1;
+//	#40
+//	din=4;
+//	wr=1;
+//	rd=0;
+//	#10
+//	din=5;
+//	wr=1;
+//	rd=0;
+//	#20
+//	din=6;
+//	wr=1;
+//	rd=0;
+//	#40
+//	din=4;
+//	wr=1;
+//	rd=1;
+//	
+//	
 
  
 end
