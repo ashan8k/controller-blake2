@@ -1,6 +1,6 @@
 //`timescale 1ns/ 10ps
 
-module test_bench_controller_fifo_stack # (
+module tb_controller_fifo_stack # (
 	parameter 	abits = 4,
 	parameter 	dbits = 2,
 	parameter	rd_pkt = 4)();
