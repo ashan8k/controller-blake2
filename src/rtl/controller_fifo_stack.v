@@ -2,7 +2,7 @@
 //
 // controller_fifo_stack.v
 // -------------- 
-// Enhanced FIFO Stack for black2 controller.
+// Enhanced FIFO Stack for black2's controller.v
 //
 //
 // Author: Ashan Shanaka Liyanage
