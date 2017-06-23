@@ -1,3 +1,14 @@
+//===============================================================================
+//
+// controller_fifo_stack.v
+// -------------- 
+// Enhanced FIFO Stack for black2 controller.
+//
+//
+// Author: Ashan Shanaka Liyanage
+// Copyright (c) 2017, CRISP.
+// All rights reserved.
+//===============================================================================
 module controller_fifo_stack #	(
 	parameter 	abits,				// Address bits  Ex: if you need 16 addresses then abits = 4,
 	parameter	dbits,				// Data bits
