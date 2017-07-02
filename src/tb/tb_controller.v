@@ -3,7 +3,8 @@
 module tb_controller # (
 	parameter 	BUS_WIDTH = 64,
 	parameter 	BLOCK_WIDTH = 1024,
-	parameter	MAX_BLOCKS= 4)();
+	parameter	MAX_BLOCKS= 4,
+	parameter 	DATA_LENGTH=64)();
     
 	reg		clk;
 	reg 	reset_n;
@@ -17,7 +18,7 @@ module tb_controller # (
 	wire	next;
 	wire	final_block;				
 	wire	[BLOCK_WIDTH-1:0] block;	// 1024 in Blake2 
-	wire 	[63:0] data_length;
+	wire 	[DATA_LENGTH-1:0] data_length;
 	reg		hash_ready;
 	reg		digest_valid;
 
@@ -113,7 +114,8 @@ end
 controller #(
 	.BUS_WIDTH(BUS_WIDTH),
 	.BLOCK_WIDTH(BLOCK_WIDTH),
-	.MAX_BLOCKS(MAX_BLOCKS)
+	.MAX_BLOCKS(MAX_BLOCKS),
+	.DATA_LENGTH(DATA_LENGTH)
 	) U_controller (
 	.clk(clk),
 	.reset_n(reset_n),

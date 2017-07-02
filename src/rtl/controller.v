@@ -13,7 +13,8 @@
 module controller # (
 	parameter 	BUS_WIDTH,		// bus width of processer ex: 64
 	parameter	BLOCK_WIDTH,	// Block width of Blake2 ex: 1024
-	parameter 	MAX_BLOCKS)( 	// Ex: if you are using 5 blocks of hashing as maximum then make this to 5
+	parameter 	MAX_BLOCKS, 	// Ex: if you are using 5 blocks of hashing as maximum then make this to 5
+	parameter 	DATA_LENGTH)(	// Data Length. of Block(s)
 //===============================================================================
 	input wire	clk,
 	input wire	reset_n,			
@@ -36,8 +37,7 @@ module controller # (
 	output reg	next,
 	output reg	final_block,				
 	output reg	[BLOCK_WIDTH-1:0] block,	// 1024 in Blake2 
-//	output reg 	[127:0] data_length,
-	output reg 	[63:0] data_length,			// can give max. of 2^(64) bits of data
+	output reg 	[DATA_LENGTH-1:0] data_length,			// can give max. of 2^(DATA_LENGTH) bits of data
 
 	input		hash_ready,
 	//input		[511 : 0] digest,			// Hardcoded value in blake2 // Right now nothing to do with this
@@ -125,7 +125,7 @@ module controller # (
 					// first block sending
 					else if(block_sent == 0) begin
 						init <= 1;
-						next <= 1;
+						next <= 0;
 						final_block <= 0;
 					end
 					// next block sending
@@ -177,10 +177,22 @@ module controller # (
 	end
 	
 //	always @ (negedge hash_ready) begin
+	//always @ (negedge final_block) begin
+	//	hash_started <= 0;
+	//	data_length	 <= 'h0;
+	//	
+	//end
+	
+	//always @ (posedge digest_valid) begin
+	//	hash_started <= 0;
+	//	data_length	 <= 'h0;
+	//	
+	//end
 	always @ (posedge digest_valid) begin
-		hash_started <= 0;
-		data_length	 <= 'h0;
-		
+		if( current_blocks==EMPTY) begin
+			hash_started <= 0;
+			data_length	 <= 'h0;
+		end	
 	end
 	
 	
