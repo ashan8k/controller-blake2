@@ -1,8 +1,8 @@
 //`timescale 1ns/ 10ps
 
 module tb_controller # (
-	parameter 	BUS_WIDTH = 2,
-	parameter 	BLOCK_WIDTH = 16,
+	parameter 	BUS_WIDTH = 64,
+	parameter 	BLOCK_WIDTH = 1024,
 	parameter	MAX_BLOCKS= 4)();
     
 	reg		clk;
@@ -17,7 +17,7 @@ module tb_controller # (
 	wire	next;
 	wire	final_block;				
 	wire	[BLOCK_WIDTH-1:0] block;	// 1024 in Blake2 
-	wire 	[127:0] data_length;
+	wire 	[63:0] data_length;
 	reg		hash_ready;
 	reg		digest_valid;
 
@@ -36,7 +36,7 @@ initial begin
 
 	valid_in =1;
 	new_hash_request =0;
-		#150
+		#1500
 		valid_in=0;
 		#40
 		new_hash_request =1;
@@ -52,6 +52,14 @@ initial begin
 		#10
 		hash_ready = 0;
 		#30 
+		hash_ready = 1;
+		#10 
+		hash_ready = 0;
+		#30
+		hash_ready = 1;
+		#10 
+		hash_ready = 0;
+		#30
 		digest_valid = 1;
 		#10
 		digest_valid =0;
