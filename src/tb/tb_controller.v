@@ -26,43 +26,76 @@ initial begin
 	clk = 1;       	
   	reset_n = 1;   
 	din = 0;
+	valid_in =0;
+	new_hash_request =0;
+	hash_ready = 1;
 // reset system	
   	#10 
   	reset_n = 0;    
   	#20 
 	reset_n = 1;
 	#10
-// wring data until full
 
-	valid_in =1;
-	new_hash_request =0;
-		#1500
-		valid_in=0;
+	// 4 blocks 
+
+	@(posedge clk); valid_in =1;
+		#600
+	@(posedge clk); valid_in=0;
 		#40
-		new_hash_request =1;
+	@(posedge clk); new_hash_request =1;
+		#20
+	@(posedge clk);	hash_ready = 0;digest_valid = 0;
+		#20
+	@(posedge clk); new_hash_request =0;
+		#100 
+	@(posedge clk);	hash_ready = 1;
 		#10
-		new_hash_request =0;
+	@(posedge clk);	hash_ready = 0;
 		#30 
-		hash_ready = 1;
-		new_hash_request =1;
+	@(posedge clk);	hash_ready = 1;
 		#10
-		hash_ready = 0;
+	@(posedge clk);	hash_ready = 0;
 		#30 
-		hash_ready = 1;
+	@(posedge clk);	hash_ready = 1;
 		#10
-		hash_ready = 0;
-		#30 
-		hash_ready = 1;
-		#10 
-		hash_ready = 0;
+	@(posedge clk);	hash_ready = 0;
 		#30
-		hash_ready = 1;
-		#10 
-		hash_ready = 0;
-		#30
-		digest_valid = 1;
+	@(posedge clk);	hash_ready = 1;digest_valid = 1;
 		#10
-		digest_valid =0;
+		
+	// 1 block
+	@(posedge clk); valid_in =1;
+		#10
+	@(posedge clk); valid_in=0;
+		#40
+	@(posedge clk); new_hash_request =1;
+		#20
+	@(posedge clk);	hash_ready = 0;digest_valid = 0;
+		#20
+	@(posedge clk); new_hash_request =0;
+		#100 
+	@(posedge clk);	hash_ready = 1;digest_valid = 1;
+	#20
+	
+	// 2 block
+	@(posedge clk); valid_in =1;
+		#200
+	@(posedge clk); valid_in=0;
+		#40
+	@(posedge clk); new_hash_request =1;
+		#20
+	@(posedge clk);	hash_ready = 0;digest_valid = 0;
+		#20
+	@(posedge clk); new_hash_request =0;
+		#100 
+	@(posedge clk);	hash_ready = 1;
+		#10
+	@(posedge clk);	hash_ready = 0;
+		#30
+	@(posedge clk);	hash_ready = 1;digest_valid = 1;
+	
+	
+
 		
 		
 		
@@ -74,7 +107,7 @@ always begin
 end
 
 always begin
-  #15 din = din+1; 
+  #15 @(posedge clk); din = din+1; 
 end
 
 controller #(

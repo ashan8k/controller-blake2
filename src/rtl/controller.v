@@ -37,7 +37,7 @@ module controller # (
 	output reg	final_block,				
 	output reg	[BLOCK_WIDTH-1:0] block,	// 1024 in Blake2 
 //	output reg 	[127:0] data_length,
-	output reg 	[63:0] data_length,			// can handle max. of 2^(64)-1 bits of data
+	output reg 	[63:0] data_length,			// can give max. of 2^(64) bits of data
 
 	input		hash_ready,
 	//input		[511 : 0] digest,			// Hardcoded value in blake2 // Right now nothing to do with this
@@ -63,11 +63,7 @@ module controller # (
 			for (i=0; i<MAX_DEPTH; i=i+1) array_block[i] <= 'h0;	// Initial zero padding
 			cont_buf_empty	<= 1'b1;
 			cont_buf_full	<= 1'b0;
-			hash_started	<= 1'b0;
-
-			init			<= 1'b0;
-			next			<= 1'b0;
-			final_block		<= 1'b0;
+			hash_started	<= 1'b0;	// When hash started is not equal to 1, then init, next and final_block will be zero on next always block
 		end
 		else begin
 			if (valid_in && !new_hash_request && !cont_buf_full && !hash_started) begin		
@@ -82,7 +78,7 @@ module controller # (
 				hash_started <= 1;
 				current_blocks <= ((counter-1)/PACKETS)+1;
 				block_sent	<=0;
-				data_length <= counter;
+				data_length <= counter*BUS_WIDTH;
 				sent <=0;
 			end
 		end	
@@ -101,7 +97,9 @@ module controller # (
 	always @ (posedge clk) begin
 		if(hash_ready==0) 		sent <= 0;
 	end
+	
 	integer j;
+	
 	always @ (posedge clk) begin
 		if(hash_started) begin
 			if(hash_ready==1 && sent == 0)begin // send data only when hash is ready
@@ -140,33 +138,6 @@ module controller # (
 									block_sent <= block_sent+1;
 					current_blocks <= current_blocks-1;
 					sent <= 1;
-				// final block
-//				if(current_blocks==1) begin
-//					final_block <= 1;
-//					next <=0;
-//					counter <= 'h0;
-//				end
-//				// Non-final blocks
-//				else begin
-//					block_sent <= block_sent+1;
-//					current_blocks <= current_blocks-1;
-//					final_block <= 0;
-//					if (block_sent == EMPTY) begin
-//						next <=0;
-//					end
-//					else begin
-//						next <=1;
-//					end
-//				end
-//
-//				// first block
-//				if (block_sent == EMPTY) begin
-//					init <=1;
-//				end
-//				else begin
-//					init <=0;
-//				end
-				
 				// write data to block and after that zero padding
 				for (j=0; j<PACKETS; j=j+1) begin
 						block[BUS_WIDTH*j +: BUS_WIDTH]	<= array_block[block_sent*PACKETS+j];	// Verilog 2001 "variable part select"
