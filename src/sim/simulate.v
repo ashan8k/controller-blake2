@@ -19,18 +19,20 @@ wire            digest_valid;
 
 integer file, outerr;
 
-reg  [511:  0] cmd; // increase depending on digest length
+reg  [511:  0] WRTMP; // increase size depending on digest length
 
-task init(); begin // remove for integration
-    block = "flamingo";
-    length_512 = 8;
+
+task init(); begin
+    block = "flamingo"; // remove before integration
+    length_512 = 8;     // remove before integration
+ 
+    WRTMP = {"echo -n '", block[length_512*8-1 -: 64], "' > /tmp/b2_dat"};
 end
 endtask
 
 task simulate(); begin
-    cmd = {"echo -n '", block[length_512*8-1 -: 64], "' > /tmp/b2_dat"};
-    $display("executing:\n%s", cmd);
-    $system(cmd);
+    $display("executing:\n%s", WRTMP);
+    $system(WRTMP);
     $system("/usr/local/bin/b2sum /tmp/b2_dat | cut -d\" \" -f1 > /tmp/b2_dgst");
     file = $fopen("/tmp/b2_dgst", "r");
     outerr = $fscanf(file, "%h", digest_512);
