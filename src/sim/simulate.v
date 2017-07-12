@@ -8,13 +8,13 @@ parameter CLK_PERIOD = 5;
 reg clk = 0;
 reg  [7   :  0] cycle_ctr;
 
-reg             init_512;
-reg             next_512;
+reg             init_88;
+reg             next_88;
 reg             final;
 reg [1023:  0]  block;      // set as IO when integrating
 reg [127 :  0]  length_512; // set as IO when integrating
 wire            ready_512;
-reg  [511 :  0] digest_512;
+reg  [87 :  0]  digest_88;
 wire            digest_valid;
 
 integer file, outerr;
@@ -33,16 +33,16 @@ endtask
 task simulate(); begin
     $display("executing:\n%s", WRTMP);
     $system(WRTMP);
-    $system("/usr/local/bin/b2sum /tmp/b2_dat | cut -d\" \" -f1 > /tmp/b2_dgst");
+    $system("/usr/local/bin/b2sum -ablake2s -l88 /tmp/b2_dat | cut -d\" \" -f1 > /tmp/b2_dgst");
     file = $fopen("/tmp/b2_dgst", "r");
-    outerr = $fscanf(file, "%h", digest_512);
+    outerr = $fscanf(file, "%h", digest_88);
     if (file == 0) begin
         $display("Could not read file!");
         $finish;
     end
     $display("################## DIGEST ##################");
     $display("datalen: %d", length_512);
-    $display("%h", digest_512);
+    $display("%h", digest_88);
 
     while (cycle_ctr < 28) begin
         cycle_ctr = cycle_ctr + 1;
