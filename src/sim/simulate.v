@@ -1,68 +1,69 @@
 // Simulates blake2b function
 // depends on: https://github.com/BLAKE2/BLAKE2
 
-module main;
+module sim(clk, init, next, final, block, length, ready, digest_valid, digest);
 
-parameter CLK_PERIOD = 5;
+parameter BUFFER_SIZE = 8;
 
-reg clk = 0;
-reg  [7   :  0] cycle_ctr;
+input clk, init, next, final;
+input [127 : 0] length;
+input [1023 : 0] block;
+output reg ready, digest_valid;
+output reg [87 : 0] digest;
 
-reg             init_88;
-reg             next_88;
-reg             final;
-reg [1023:  0]  block;      // set as IO when integrating
-reg [127 :  0]  length_512; // set as IO when integrating
-wire            ready_512;
-reg  [87 :  0]  digest_88;
-wire            digest_valid;
+integer file, outerr, idx;
 
-integer file, outerr;
+reg  [1024*32-1:  0] WRTMP; // increase size depending on digest length
 
-reg  [511:  0] WRTMP; // increase size depending on digest length
-
-
-task init(); begin
-    block = "flamingo"; // remove before integration
-    length_512 = 8;     // remove before integration
- 
-    WRTMP = {"echo -n '", block[length_512*8-1 -: 64], "' > /tmp/b2_dat"};
-end
-endtask
+reg [1024*BUFFER_SIZE-1:0] buffer;
 
 task simulate(); begin
     $display("executing:\n%s", WRTMP);
     $system(WRTMP);
     $system("/usr/local/bin/b2sum -ablake2s -l88 /tmp/b2_dat | cut -d\" \" -f1 > /tmp/b2_dgst");
     file = $fopen("/tmp/b2_dgst", "r");
-    outerr = $fscanf(file, "%h", digest_88);
+    outerr = $fscanf(file, "%h", digest);
     if (file == 0) begin
         $display("Could not read file!");
         $finish;
     end
     $display("################## DIGEST ##################");
-    $display("datalen: %d", length_512);
-    $display("%h", digest_88);
+    $display("datalen: %d", length);
+    $display("%h", digest);
 
-    while (cycle_ctr < 28) begin
-        cycle_ctr = cycle_ctr + 1;
-    end
-    $display("cycle count: %d", cycle_ctr);
     $display("################## SUCCESS #################");
     $fclose(file);
-    $finish;
+    // $finish;
 end
 endtask
 
 initial begin
-    cycle_ctr = 0;
-    init();
-    simulate();
+    idx = 0;
 end
 
 always @(*) begin
-    #CLK_PERIOD clk = !clk;
+    if (init) begin
+        $display("Entering [[___<init>___]]");
+        $display("[FEEDING BUFFER]: %s", block);
+        buffer[1023:0] = block;
+        $display("[BUF]: {%s}", buffer);
+    end
+    if (next)  begin
+        idx = idx + 1;
+        $display("Entering [[___<next>___]]");
+        $display("[FEEDING BUFFER]: %s at index '%d'", block, idx);
+        buffer[(1024*(idx+1))-1-:1024] = block;
+        $display("[BUF]: {%s}", buffer);
+    end
+    if (final) begin
+        $display("Entering [[___<final>___]]");
+        $display("[BUF]: {%s}", buffer);
+        
+        WRTMP = {"echo -n '", buffer, "' > /tmp/b2_dat"};
+        simulate();
+        digest_valid = 1;
+        $finish();
+    end
 end
-
 
 endmodule
