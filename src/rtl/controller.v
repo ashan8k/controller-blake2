@@ -11,9 +11,9 @@
 //===============================================================================
 
 module controller # (
-	parameter 	BUS_WIDTH,
-	parameter	BLOCK_WIDTH,
-	parameter	DATA_LENGTH
+	parameter 	BUS_WIDTH   = 32,
+	parameter	BLOCK_WIDTH = 1024,
+	parameter	DATA_LENGTH = 128
 	)(
 //===============================================================================
 	input wire	clk,
@@ -40,6 +40,7 @@ module controller # (
 	);
 
 	localparam	PACKETS_PER_BLOCK = BLOCK_WIDTH/BUS_WIDTH;
+	localparam	BUS_BYTES = BUS_WIDTH/8;
 
 	reg		[$clog2(PACKETS_PER_BLOCK)-1:0] block_ptr; // if BLOCK_WIDTH=1024,BUS_WIDTH=32, then PACKETS_PER_BLOCK=32.. so [4:0]
 	reg		corrupt;
@@ -48,6 +49,7 @@ module controller # (
 		if (!reset_n) begin			
 			block_ptr	<= 'h0;
 			data_length     <= 1'b0;
+			block		<= 'h0;
 		end
 	end
 
@@ -57,14 +59,12 @@ module controller # (
 		if (valid_in) begin
 			if(block_ptr==0) begin
 				block <= 0+din; 	
-//				block[block_ptr*BUS_WIDTH+:BUS_WIDTH] <= din;
-//				block[(PACKETS_PER_BLOCK-1)*BUS_WIDTH-:BUS_WIDTH] <= 'h0;
 			end
 			else begin	
 				block[block_ptr*BUS_WIDTH+:BUS_WIDTH] <= din; // +: Varible part select 2001 verilog
 			end
 			block_ptr	<= block_ptr + 1;
-			data_length 	<= data_length +1;
+			data_length 	<= data_length +BUS_BYTES;
 		end
 	end
 	
@@ -77,15 +77,15 @@ module controller # (
 	end
 
 	// always block for reading operations
-	always @ (*) begin
-		if(hash_ready)begin
-			if(new_hash_request) begin
-				if(data_length < PACKETS_PER_BLOCK) begin 		// Final + Init
+	always @ (negedge clk) begin
+
+			if(new_hash_request==1) begin
+				if(data_length <= PACKETS_PER_BLOCK*BUS_BYTES) begin 		// Final + Init
 					init	<= 1;
 					next	<= 0;
 					final	<= 1;
 				end
-				else begin					// Final
+				else begin	       			// Final
 					init	<= 0;
 					next	<= 0;
 					final	<= 1;
@@ -93,25 +93,24 @@ module controller # (
 			end
 			else begin
 				if(block_ptr=='h0) begin
-					if(data_length == PACKETS_PER_BLOCK) begin	// Init
-						init	= 1;
-						next	= 0;
-						final	= 0;
+					if(data_length == PACKETS_PER_BLOCK*BUS_BYTES) begin	// Init
+						init	<= 1;
+						next	<= 0;
+						final	<= 0;
 					
 					end
 					else if (data_length > 0) begin	       		// Next 
-						init	= 0;
-						next	= 1;
-						final	= 0;
+						init	<= 0;
+						next	<= 1;
+						final	<= 0;
 					end
 				end
 				else begin					// INIT=0,NEXT=0,FINAL=0
-					init	= 0;
-					next	= 0;
-					final	= 0;					
+					init	<= 0;
+					next	<= 0;
+					final	<= 0;					
 				end
 			end
-		end	
 	end 
 
 // Since this controller has 1 block of memory it can't buffered data so long if hash_ready and digest_valid took long time.

@@ -1,9 +1,9 @@
 //`timescale 1ns/ 10ps
 
 module tb_controller # (
-	parameter 	BUS_WIDTH	= 2,
-	parameter 	BLOCK_WIDTH 	= 8,
-	parameter 	DATA_LENGTH 	=8)();
+	parameter 	BUS_WIDTH	= 32,
+	parameter 	BLOCK_WIDTH 	= 1024,
+	parameter 	DATA_LENGTH 	= 128)();
     
 	reg	clk;
 	reg 	reset_n;
@@ -35,67 +35,37 @@ initial begin
 	reset_n = 1;
 	#10
 
-	// 4 blocks 
-
-	@(posedge clk); valid_in =1;
-		#20;
+// case1 0 data, new_hash_request 
 	@(posedge clk); new_hash_request =1;valid_in=0;
 		#10
-	@(posedge clk); new_hash_request =0;valid_in=1;
-//	@(posedge clk);	hash_ready = 0;digest_valid = 0;
-//		#20
-//	@(posedge clk); new_hash_request =0;
-//		#100 
-//	@(posedge clk);	hash_ready = 1;
-//		#10
-//	@(posedge clk);	hash_ready = 0;
-//		#30 
-//	@(posedge clk);	hash_ready = 1;
-//		#10
-//	@(posedge clk);	hash_ready = 0;
-//		#30 
-//	@(posedge clk);	hash_ready = 1;
-//		#10
-//	@(posedge clk);	hash_ready = 0;
-//		#30
-//	@(posedge clk);	hash_ready = 1;digest_valid = 1;
-//		#10
-//		
-//	// 1 block
-//	@(posedge clk); valid_in =1;
-//		#10
-//	@(posedge clk); valid_in=0;
-//		#40
-//	@(posedge clk); new_hash_request =1;
-//		#20
-//	@(posedge clk);	hash_ready = 0;digest_valid = 0;
-//		#20
-//	@(posedge clk); new_hash_request =0;
-//		#100 
-//	@(posedge clk);	hash_ready = 1;digest_valid = 1;
-//	#20
-//	
-//	// 2 block
-//	@(posedge clk); valid_in =1;
-//		#200
-//	@(posedge clk); valid_in=0;
-//		#40
-//	@(posedge clk); new_hash_request =1;
-//		#20
-//	@(posedge clk);	hash_ready = 0;digest_valid = 0;
-//		#20
-//	@(posedge clk); new_hash_request =0;
-//		#100 
-//	@(posedge clk);	hash_ready = 1;
-//		#10
-//	@(posedge clk);	hash_ready = 0;
-//		#30
-//	@(posedge clk);	hash_ready = 1;digest_valid = 1;
-	
-	
+	@(posedge clk); new_hash_request =0;
+		#10
 
-		
-		
+// case2, 4 byte data, new_hash_request  
+	@(posedge clk); valid_in =1;
+		#10;
+	@(posedge clk); new_hash_request =1;valid_in=0;
+		#10;
+	@(posedge clk); new_hash_request =0;
+		#10;
+
+// case3 124 byte data, new_hash_request
+	@(posedge clk); valid_in =1;
+		#310;
+	@(posedge clk); new_hash_request =1;valid_in=0;
+		#10;
+	@(posedge clk); new_hash_request =0;
+		#10;
+
+// case4 128 byte data, new_hash_request
+	@(posedge clk); valid_in =1;
+		#320;
+	@(posedge clk); new_hash_request =1;valid_in=0;
+		#10;
+	@(posedge clk); new_hash_request =0;
+		#10;
+
+
 		
  
 end
@@ -105,7 +75,7 @@ always begin
 end
 
 always begin
-  #15 @(posedge clk); din = din+1; 
+  #15 @(posedge clk); din = din+32'h11111111; 
 end
 
 controller #(
