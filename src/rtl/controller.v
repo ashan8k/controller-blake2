@@ -45,6 +45,7 @@ module controller # (
 	reg		[$clog2(PACKETS_PER_BLOCK)-1:0] block_ptr; // if BLOCK_WIDTH=1024,BUS_WIDTH=32, then PACKETS_PER_BLOCK=32.. so [4:0]
 	reg		corrupt;
 	
+	// after new_hash_request system should be reset
 	always @ (posedge clk or negedge reset_n) begin
 		if (!reset_n) begin			
 			block_ptr	<= 'h0;
@@ -79,37 +80,31 @@ module controller # (
 	// always block for reading operations
 	always @ (negedge clk) begin
 
-			if(new_hash_request==1) begin
-				if(data_length <= PACKETS_PER_BLOCK*BUS_BYTES) begin 		// Final + Init
-					init	<= 1;
-					next	<= 0;
-					final	<= 1;
-				end
-				else begin	       			// Final
-					init	<= 0;
-					next	<= 0;
-					final	<= 1;
-				end
+			if(new_hash_request == 1 && data_length <= PACKETS_PER_BLOCK*BUS_BYTES) begin 		// Final + Init 
+				init	<= 1;
+				next	<= 0;
+				final	<= 1;
 			end
-			else begin
-				if(block_ptr=='h0) begin
-					if(data_length == PACKETS_PER_BLOCK*BUS_BYTES) begin	// Init
-						init	<= 1;
-						next	<= 0;
-						final	<= 0;
-					
-					end
-					else if (data_length > 0) begin	       		// Next 
-						init	<= 0;
-						next	<= 1;
-						final	<= 0;
-					end
-				end
-				else begin					// INIT=0,NEXT=0,FINAL=0
-					init	<= 0;
-					next	<= 0;
-					final	<= 0;					
-				end
+			else if(new_hash_request == 1 && data_length > PACKETS_PER_BLOCK*BUS_BYTES) begin	// Final
+				init	<= 0;
+				next	<= 0;
+				final	<= 1;
+			end
+			else if(block_ptr == 0 && data_length == PACKETS_PER_BLOCK*BUS_BYTES )begin		// Init
+				init	<= 1;
+				next	<= 0;
+				final	<= 0;
+			end
+			else if(block_ptr == 0 && data_length > 0 )begin		//Next
+				init	<= 0;
+				next	<= 1;
+				final	<= 0;
+
+			end
+			else begin					// INIT=0,NEXT=0,FINAL=0
+      				init	<= 0;
+      				next	<= 0;
+      				final	<= 0;					
 			end
 	end 
 

@@ -33,7 +33,7 @@ initial begin
   	reset_n = 0;    
   	#20 
 	reset_n = 1;
-	#10
+	#10;
 
 // case1 0 data, new_hash_request 
 	@(posedge clk); new_hash_request =1;valid_in=0;
@@ -65,9 +65,63 @@ initial begin
 	@(posedge clk); new_hash_request =0;
 		#10;
 
+//case5 132 byte data, new_hash_request -> init, then final
+	@(posedge clk); valid_in =1;
+		#330;
+	@(posedge clk); new_hash_request =1;valid_in=0;
+		#10;
+	@(posedge clk); new_hash_request =0;
+		#10;
 
+//case6 252 byte data, new_hash_request -> init, then 31 clocks final
+	@(posedge clk); valid_in =1; 	
+		#630;
+	@(posedge clk); new_hash_request =1;valid_in=0;
+		#10;
+	@(posedge clk); new_hash_request =0;
+		#10;
+
+//case6 256 byte data, new_hash_request -> init, then 32 clocks final
+	@(posedge clk); valid_in =1; 	
+		#640;
+	@(posedge clk); new_hash_request =1;valid_in=0;
+		#10;
+	@(posedge clk); new_hash_request =0;
+		#10;		
+
+//case7 260 byte data, new_hash_request -> init, then 32 clocks next, then final
+	@(posedge clk); valid_in =1; 	
+		#650;
+	@(posedge clk); new_hash_request =1;valid_in=0;
+		#10;
+	@(posedge clk); new_hash_request =0;
+		#10;		 
+
+//case8 380 byte data, new_hash_request -> init, then 32 clocks next, then 31 clocks final
+	@(posedge clk); valid_in =1; 	
+		#950;
+	@(posedge clk); new_hash_request =1;valid_in=0;
+		#10;
+	@(posedge clk); new_hash_request =0;
+		#10;
 		
- 
+//case9 384 byte data, new_hash_request -> init, then 32 clocks next, then 32 clocks final
+	@(posedge clk); valid_in =1; 	
+		#960;
+	@(posedge clk); new_hash_request =1;valid_in=0;
+		#10;
+	@(posedge clk); new_hash_request =0;
+		#10;
+
+//case10 390 byte data, new_hash_request -> init, then 32 clocks next, then 32 clocks final
+	@(posedge clk); valid_in =1; 	
+		#960;
+	@(posedge clk); new_hash_request =1;valid_in=0;
+		#10;
+	@(posedge clk); new_hash_request =0;
+		#10;
+
+
 end
 
 always begin
