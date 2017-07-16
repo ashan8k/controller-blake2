@@ -44,8 +44,8 @@ module controller # (
 
 	reg		[$clog2(PACKETS_PER_BLOCK)-1:0] block_ptr; // if BLOCK_WIDTH=1024,BUS_WIDTH=32, then PACKETS_PER_BLOCK=32.. so [4:0]
 	reg		corrupt;
-	
-	// after new_hash_request system should be reset
+
+	// system reset (negedge)	
 	always @ (posedge clk or negedge reset_n) begin
 		if (!reset_n) begin			
 			block_ptr	<= 'h0;
@@ -69,6 +69,7 @@ module controller # (
 		end
 	end
 	
+	// after new_hash_request system should be re-initialize 
 	always @ (posedge clk) begin
 		if(new_hash_request) begin
 			block_ptr <= 0;
