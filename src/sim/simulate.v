@@ -25,7 +25,7 @@ task simulate(); begin
     outerr = $fscanf(file, "%h", digest);
     if (file == 0) begin
         $display("Could not read file!");
-        $finish;
+        //$finish;
     end
     $display("################## DIGEST ##################");
     $display("datalen: %d", length);
@@ -62,7 +62,7 @@ always @(*) begin
         WRTMP = {"echo -n '", buffer, "' > /tmp/b2_dat"};
         simulate();
         digest_valid = 1;
-        $finish();
+        //$finish();
     end
 end
 
