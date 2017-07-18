@@ -16,9 +16,10 @@ integer file, outerr, idx;
 reg  [1024*32-1:  0] WRTMP; // increase size depending on digest length
 
 reg [1024*BUFFER_SIZE-1:0] buffer;
+reg [127 : 0] tmp_length;
 
 task simulate(); begin
-    $display("executing:\n%s", WRTMP);
+  //  $display("executing:\n%s", WRTMP);
     $system(WRTMP);
     $system("/usr/local/bin/b2sum -ablake2s -l88 /tmp/b2_dat | cut -d\" \" -f1 > /tmp/b2_dgst");
     file = $fopen("/tmp/b2_dgst", "r");
@@ -28,42 +29,77 @@ task simulate(); begin
         //$finish;
     end
     $display("################## DIGEST ##################");
-    $display("datalen: %d", length);
+    $display("datalen: %d", tmp_length);
     $display("%h", digest);
 
     $display("################## SUCCESS #################");
     $fclose(file);
+	@(posedge clk); buffer = 0;idx = 0;
     // $finish;
 end
 endtask
 
 initial begin
     idx = 0;
+	buffer ='h0;
+	buffer ='h0;
 end
 
-always @(*) begin
+//always @(*) begin
+//    if (init) begin
+// //       $display("Entering [[___<init>___]]");
+// //       $display("[FEEDING BUFFER]: %s", block);
+//        buffer[1023:0] = block;
+////        $display("[BUF]: {%s}", buffer);
+//    end
+//    if (next)  begin
+//        idx = idx + 1;
+//  //      $display("Entering [[___<next>___]]");
+//  //      $display("[FEEDING BUFFER]: %s at index '%d'", block, idx);
+//        buffer[(1024*(idx+1))-1-:1024] = block;
+//   //     $display("[BUF]: {%s}", buffer);
+//    end
+//    if (final) begin
+//    //    $display("Entering [[___<final>___]]");
+//    //    $display("[BUF]: {%s}", buffer);
+//        
+//        WRTMP = {"echo -n '", buffer, "' > /tmp/b2_dat"};
+//        simulate();
+//        digest_valid = 1;
+//        //$finish();
+//    end
+//end
+
+
+always @ (posedge clk) begin
     if (init) begin
-        $display("Entering [[___<init>___]]");
-        $display("[FEEDING BUFFER]: %s", block);
-        buffer[1023:0] = block;
-        $display("[BUF]: {%s}", buffer);
+ //       $display("Entering [[___<init>___]]");
+ //       $display("[FEEDING BUFFER]: %s", block);
+        buffer[1023:0] <= block;
+//        $display("[BUF]: {%s}", buffer);
     end
-    if (next)  begin
+
+	
+    else if (next || (final && !init))  begin
         idx = idx + 1;
-        $display("Entering [[___<next>___]]");
-        $display("[FEEDING BUFFER]: %s at index '%d'", block, idx);
-        buffer[(1024*(idx+1))-1-:1024] = block;
-        $display("[BUF]: {%s}", buffer);
+  //      $display("Entering [[___<next>___]]");
+  //      $display("[FEEDING BUFFER]: %s at index '%d'", block, idx);
+        //buffer[(1024*(idx+1))-1-:1024] = block;
+        buffer[(1024*(idx+1))-1-:1024] <= block;
+   //     $display("[BUF]: {%s}", buffer);
     end
-    if (final) begin
-        $display("Entering [[___<final>___]]");
-        $display("[BUF]: {%s}", buffer);
-        
+
+end
+
+always @ (negedge final) begin
+
         WRTMP = {"echo -n '", buffer, "' > /tmp/b2_dat"};
         simulate();
         digest_valid = 1;
-        //$finish();
-    end
+	tmp_length <= length;
 end
+
+
+
 
 endmodule

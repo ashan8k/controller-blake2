@@ -35,12 +35,12 @@ initial begin
 	reset_n = 1;
 	#10;
 
-//// case1 0 data, new_hash_request 
-//	@(posedge clk); new_hash_request =1;valid_in=0;
-//		#10
-//	@(posedge clk); new_hash_request =0;
-//		#10
-//
+// case1 0 data, new_hash_request 		// can not verfy  
+	@(posedge clk); new_hash_request =1;valid_in=0;
+		#10
+	@(posedge clk); new_hash_request =0;
+		#10
+
 // case2, 4 byte data, new_hash_request  
 	@(posedge clk); valid_in =1;
 		#10;
@@ -81,7 +81,7 @@ initial begin
 	@(posedge clk); new_hash_request =0;
 		#10;
 
-//case6 256 byte data, new_hash_request -> init, then 32 clocks final
+//case7 256 byte data, new_hash_request -> init, then 32 clocks final
 	@(posedge clk); valid_in =1; 	
 		#640;
 	@(posedge clk); new_hash_request =1;valid_in=0;
@@ -89,7 +89,7 @@ initial begin
 	@(posedge clk); new_hash_request =0;
 		#10;		
 
-//case7 260 byte data, new_hash_request -> init, then 32 clocks next, then final
+//case8 260 byte data, new_hash_request -> init, then 32 clocks next, then final
 	@(posedge clk); valid_in =1; 	
 		#650;
 	@(posedge clk); new_hash_request =1;valid_in=0;
@@ -97,7 +97,7 @@ initial begin
 	@(posedge clk); new_hash_request =0;
 		#10;		 
 
-//case8 380 byte data, new_hash_request -> init, then 32 clocks next, then 31 clocks final
+//case9 380 byte data, new_hash_request -> init, then 32 clocks next, then 31 clocks final
 	@(posedge clk); valid_in =1; 	
 		#950;
 	@(posedge clk); new_hash_request =1;valid_in=0;
@@ -105,7 +105,7 @@ initial begin
 	@(posedge clk); new_hash_request =0;
 		#10;
 		
-//case9 384 byte data, new_hash_request -> init, then 32 clocks next, then 32 clocks final
+//case10 384 byte data, new_hash_request -> init, then 32 clocks next, then 32 clocks final
 	@(posedge clk); valid_in =1; 	
 		#960;
 	@(posedge clk); new_hash_request =1;valid_in=0;
@@ -113,9 +113,9 @@ initial begin
 	@(posedge clk); new_hash_request =0;
 		#10;
 
-//case10 390 byte data, new_hash_request -> init, then 32 clocks next, then 32 clocks final
+//case11 388 byte data, new_hash_request -> init, then 32 clocks next, then 32 clocks next, then final
 	@(posedge clk); valid_in =1; 	
-		#960;
+		#970;
 	@(posedge clk); new_hash_request =1;valid_in=0;
 		#10;
 	@(posedge clk); new_hash_request =0;
