@@ -8,3 +8,4 @@ b2sum -ablake2s -l88 260bytes
 b2sum -ablake2s -l88 380bytes
 b2sum -ablake2s -l88 384bytes
 b2sum -ablake2s -l88 388bytes
+b2sum -ablake2s -l88 200bytes

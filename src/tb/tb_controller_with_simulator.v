@@ -120,6 +120,19 @@ initial begin
 		#10;
 	@(posedge clk); new_hash_request =0;
 		#10;
+// case 200 bytes 
+	@(posedge clk); valid_in =1; 	
+		#250;
+	@(posedge clk); valid_in =0; 	
+		#50;
+	@(posedge clk); valid_in =1; 	
+		#250;
+
+	@(posedge clk); valid_in=0;
+		#10;
+	@(posedge clk); new_hash_request =1;
+		 #10;
+	@(posedge clk); new_hash_request =0;
 
 
 end
