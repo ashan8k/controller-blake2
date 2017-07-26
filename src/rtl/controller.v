@@ -26,24 +26,27 @@ module controller # (
 	input wire 	valid_in,
 	input wire	new_hash_request,
 	
+	output wire 	hash_corrupt,					// To detect when hash corrupt (for debug purpose)
 	
 //===============================================================================
 // ports related to the hash engine 
-	input wire	hash_ready,
-	input wire	digest_valid,				// when finished
+	input wire	hash_ready,					// Hash is ready 
+	input wire	digest_valid,					// When finished
 	
 	output reg	init,
 	output reg	next,
 	output reg	final,				
-	output reg	[BLOCK_WIDTH-1:0] block,		// 1024 in Blake2 
-	output reg 	[DATA_LENGTH-1:0] data_length		// can give max. of 2^(DATA_LENGTH) bits of data
+	output reg	[BLOCK_WIDTH-1:0] block_out,			// 1024 in Blake2 
+	output reg 	[DATA_LENGTH-1:0] data_length_out		// can give max. of 2^(DATA_LENGTH) bits of data
 	);
 
 	localparam	PACKETS_PER_BLOCK = BLOCK_WIDTH/BUS_WIDTH;
 	localparam	BUS_BYTES = BUS_WIDTH/8;
 
-	reg		[$clog2(PACKETS_PER_BLOCK)-1:0] block_ptr; // if BLOCK_WIDTH=1024,BUS_WIDTH=32, then PACKETS_PER_BLOCK=32.. so [4:0]
-	reg		corrupt;
+	reg		[$clog2(PACKETS_PER_BLOCK)-1:0] block_ptr; 	// if BLOCK_WIDTH=1024,BUS_WIDTH=32, then PACKETS_PER_BLOCK=32.. so [4:0]
+
+	reg 		[BLOCK_WIDTH-1:0] block;			// Ex: 32 set of 32bits = 1024
+	reg		[DATA_LENGTH-1:0] data_length;			// cumilative length of the bytes 
 
 	// system reset (negedge)	
 	always @ (posedge clk or negedge reset_n) begin
@@ -56,7 +59,7 @@ module controller # (
 
 
 	//always block for write operation	
-	always @ (posedge clk) begin
+	always @ (negedge clk) begin
 		if (valid_in) begin
 			if(block_ptr==0) begin
 				block <= 0+din; 	
@@ -77,47 +80,52 @@ module controller # (
 			block	<= 'h0;
 		end
 	end
-
+	
 	// always block for reading operations
-	always @ (negedge clk) begin
+	always @ (posedge clk) begin
 
-			if(new_hash_request == 1 && data_length <= PACKETS_PER_BLOCK*BUS_BYTES) begin 		// Final + Init 
+			if((new_hash_request == 1) && (data_length <= PACKETS_PER_BLOCK*BUS_BYTES)) begin 		// Final + Init 
 				init	<= 1;
 				next	<= 0;
 				final	<= 1;
+				block_out 	<= block;
+				data_length_out	<= data_length;
 			end
-			else if(new_hash_request == 1 && data_length > PACKETS_PER_BLOCK*BUS_BYTES) begin	// Final
+			else if((new_hash_request == 1) && (data_length > PACKETS_PER_BLOCK*BUS_BYTES)) begin	// Final
 				init	<= 0;
 				next	<= 0;
 				final	<= 1;
+				block_out 	<= block;
+				data_length_out	<= data_length;
 			end
-			else if(block_ptr == 0 && data_length == PACKETS_PER_BLOCK*BUS_BYTES )begin		// Init
+			else if((block_ptr == 0) && (data_length == PACKETS_PER_BLOCK*BUS_BYTES))begin		// Init
 				init	<= 1;
 				next	<= 0;
 				final	<= 0;
+				block_out 	<= block;
+				data_length_out	<= data_length;
 			end
-			else if(block_ptr == 0 && data_length > 0 )begin		//Next
+			else if((block_ptr == 0) && (data_length > 0) )begin		//Next
 				init	<= 0;
 				next	<= 1;
 				final	<= 0;
+				block_out 	<= block;
+				data_length_out	<= data_length;
 
 			end
 			else begin					// INIT=0,NEXT=0,FINAL=0
       				init	<= 0;
       				next	<= 0;
       				final	<= 0;					
+				block_out 	<= 0;
+				data_length_out	<= 0;
 			end
 	end 
 
 // Since this controller has 1 block of memory it can't buffered data so long if hash_ready and digest_valid took long time.
 // in case to delect CORRUPT scenarios. follwing code is used 
 
-
-	always @ (posedge clk) begin
-		if(next==1 && hash_ready==0 || init==1 && hash_ready==0 || final==1 && hash_ready==0) begin
-			corrupt =1;
-		end
-	end
+	assign hash_corrupt = (next|init|final)&(!hash_ready|!digest_valid);
 
 endmodule
 

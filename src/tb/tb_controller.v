@@ -20,6 +20,7 @@ module tb_controller # (
 	wire	[BLOCK_WIDTH-1:0] block;	// 1024 in Blake2 
 	wire 	[DATA_LENGTH-1:0] data_length;
 
+	localparam CLK_PERIOD = 10;
 initial begin        
 
 	clk = 1;       	
@@ -27,7 +28,8 @@ initial begin
 	din = 0;
 	valid_in =0;
 	new_hash_request =0;
-	hash_ready = 1;
+	hash_ready = 0;
+	digest_valid = 0;
 // reset system	
   	#10 
   	reset_n = 0;    
@@ -35,97 +37,109 @@ initial begin
 	reset_n = 1;
 	#10;
 
-// case1 0 data, new_hash_request 
-	@(posedge clk); new_hash_request =1;valid_in=0;
-		#10
-	@(posedge clk); new_hash_request =0;
-		#10
+// case 1 data with new hash request 
+//	@(posedge clk); valid_in = 1; new_hash_request =1;
+//	#CLK_PERIOD;
+//	@(posedge clk); valid_in = 0; new_hash_request =0;
 
-// case2, 4 byte data, new_hash_request  
-	@(posedge clk); valid_in =1;
-		#10;
-	@(posedge clk); new_hash_request =1;valid_in=0;
-		#10;
-	@(posedge clk); new_hash_request =0;
-		#10;
+	@(posedge clk); valid_in = 1; 
+	#(CLK_PERIOD*50);
+	@(posedge clk); valid_in = 0; new_hash_request =1;
+	#CLK_PERIOD;
+	@(posedge clk); valid_in = 1; new_hash_request =0;
 
-// case3 124 byte data, new_hash_request
-	@(posedge clk); valid_in =1;
-		#310;
-	@(posedge clk); new_hash_request =1;valid_in=0;
-		#10;
-	@(posedge clk); new_hash_request =0;
-		#10;
-
-// case4 128 byte data, new_hash_request
-	@(posedge clk); valid_in =1;
-		#320;
-	@(posedge clk); new_hash_request =1;valid_in=0;
-		#10;
-	@(posedge clk); new_hash_request =0;
-		#10;
-
-//case5 132 byte data, new_hash_request -> init, then final
-	@(posedge clk); valid_in =1;
-		#330;
-	@(posedge clk); new_hash_request =1;valid_in=0;
-		#10;
-	@(posedge clk); new_hash_request =0;
-		#10;
-
-//case6 252 byte data, new_hash_request -> init, then 31 clocks final
-	@(posedge clk); valid_in =1; 	
-		#630;
-	@(posedge clk); new_hash_request =1;valid_in=0;
-		#10;
-	@(posedge clk); new_hash_request =0;
-		#10;
-
-//case6 256 byte data, new_hash_request -> init, then 32 clocks final
-	@(posedge clk); valid_in =1; 	
-		#640;
-	@(posedge clk); new_hash_request =1;valid_in=0;
-		#10;
-	@(posedge clk); new_hash_request =0;
-		#10;		
-
-//case7 260 byte data, new_hash_request -> init, then 32 clocks next, then final
-	@(posedge clk); valid_in =1; 	
-		#650;
-	@(posedge clk); new_hash_request =1;valid_in=0;
-		#10;
-	@(posedge clk); new_hash_request =0;
-		#10;		 
-
-//case8 380 byte data, new_hash_request -> init, then 32 clocks next, then 31 clocks final
-	@(posedge clk); valid_in =1; 	
-		#950;
-	@(posedge clk); new_hash_request =1;valid_in=0;
-		#10;
-	@(posedge clk); new_hash_request =0;
-		#10;
-		
-//case9 384 byte data, new_hash_request -> init, then 32 clocks next, then 32 clocks final
-	@(posedge clk); valid_in =1; 	
-		#960;
-	@(posedge clk); new_hash_request =1;valid_in=0;
-		#10;
-	@(posedge clk); new_hash_request =0;
-		#10;
-
-//case10 390 byte data, new_hash_request -> init, then 32 clocks next, then 32 clocks final
-	@(posedge clk); valid_in =1; 	
-		#960;
-	@(posedge clk); new_hash_request =1;valid_in=0;
-		#10;
-	@(posedge clk); new_hash_request =0;
-		#10;
-
+//
+//// case1 0 data, new_hash_request 
+//	@(posedge clk); new_hash_request =1;valid_in=0;
+//		#10
+//	@(posedge clk); new_hash_request =0;
+//		#10
+//
+//// case2, 4 byte data, new_hash_request  
+//	@(posedge clk); valid_in =1;
+//		#10;
+//	@(posedge clk); new_hash_request =1;valid_in=0;
+//		#10;
+//	@(posedge clk); new_hash_request =0;
+//		#10;
+//
+//// case3 124 byte data, new_hash_request
+//	@(posedge clk); valid_in =1;
+//		#310;
+//	@(posedge clk); new_hash_request =1;valid_in=0;
+//		#10;
+//	@(posedge clk); new_hash_request =0;
+//		#10;
+//
+//// case4 128 byte data, new_hash_request
+//	@(posedge clk); valid_in =1;
+//		#320;
+//	@(posedge clk); new_hash_request =1;valid_in=0;
+//		#10;
+//	@(posedge clk); new_hash_request =0;
+//		#10;
+//
+////case5 132 byte data, new_hash_request -> init, then final
+//	@(posedge clk); valid_in =1;
+//		#330;
+//	@(posedge clk); new_hash_request =1;valid_in=0;
+//		#10;
+//	@(posedge clk); new_hash_request =0;
+//		#10;
+//
+////case6 252 byte data, new_hash_request -> init, then 31 clocks final
+//	@(posedge clk); valid_in =1; 	
+//		#630;
+//	@(posedge clk); new_hash_request =1;valid_in=0;
+//		#10;
+//	@(posedge clk); new_hash_request =0;
+//		#10;
+//
+////case6 256 byte data, new_hash_request -> init, then 32 clocks final
+//	@(posedge clk); valid_in =1; 	
+//		#640;
+//	@(posedge clk); new_hash_request =1;valid_in=0;
+//		#10;
+//	@(posedge clk); new_hash_request =0;
+//		#10;		
+//
+////case7 260 byte data, new_hash_request -> init, then 32 clocks next, then final
+//	@(posedge clk); valid_in =1; 	
+//		#650;
+//	@(posedge clk); new_hash_request =1;valid_in=0;
+//		#10;
+//	@(posedge clk); new_hash_request =0;
+//		#10;		 
+//
+////case8 380 byte data, new_hash_request -> init, then 32 clocks next, then 31 clocks final
+//	@(posedge clk); valid_in =1; 	
+//		#950;
+//	@(posedge clk); new_hash_request =1;valid_in=0;
+//		#10;
+//	@(posedge clk); new_hash_request =0;
+//		#10;
+//		
+////case9 384 byte data, new_hash_request -> init, then 32 clocks next, then 32 clocks final
+//	@(posedge clk); valid_in =1; 	
+//		#960;
+//	@(posedge clk); new_hash_request =1;valid_in=0;
+//		#10;
+//	@(posedge clk); new_hash_request =0;
+//		#10;
+//
+////case10 390 byte data, new_hash_request -> init, then 32 clocks next, then 32 clocks final
+//	@(posedge clk); valid_in =1; 	
+//		#960;
+//	@(posedge clk); new_hash_request =1;valid_in=0;
+//		#10;
+//	@(posedge clk); new_hash_request =0;
+//		#10;
+//
 
 end
 
 always begin
-  #5 clk = ~clk; 
+  #(CLK_PERIOD/2) clk = ~clk; 
 end
 
 always begin
@@ -147,6 +161,6 @@ controller #(
 	.init(init),
 	.next(next),
 	.final(final),				
-	.block(block),
-	.data_length(data_length));
+	.block_out(block),
+	.data_length_out(data_length));
 endmodule
