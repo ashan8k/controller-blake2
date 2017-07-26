@@ -3,22 +3,25 @@
 module tb_controller # (
 	parameter 	BUS_WIDTH	= 32,
 	parameter 	BLOCK_WIDTH 	= 1024,
-	parameter 	DATA_LENGTH 	= 128)();
+	parameter 	DATA_LENGTH 	= 128,
+	parameter 	DIGEST_LENGTH	= 88)();
     
 	reg	clk;
 	reg 	reset_n;
 	reg 	[BUS_WIDTH-1:0] din;		
 	reg 	valid_in;					
 	reg 	new_hash_request;
+	wire 	hash_corrupt;
 	//wire	cont_buf_empty;
 	//wire	cont_buf_full;
-	reg	hash_ready;
-	reg	digest_valid;
+	wire	hash_ready;
+	wire	digest_valid;
 	wire	init;
 	wire	next;
 	wire	final;				
 	wire	[BLOCK_WIDTH-1:0] block;	// 1024 in Blake2 
 	wire 	[DATA_LENGTH-1:0] data_length;
+	wire	[DIGEST_LENGTH-1:0] digest;
 
 	localparam CLK_PERIOD = 10;
 initial begin        
@@ -28,8 +31,6 @@ initial begin
 	din = 0;
 	valid_in =0;
 	new_hash_request =0;
-	hash_ready = 0;
-	digest_valid = 0;
 // reset system	
   	#10 
   	reset_n = 0;    
@@ -143,7 +144,8 @@ always begin
 end
 
 always begin
-  #15 @(posedge clk); din = din+32'h11111111; 
+  //#15 @(posedge clk); din = din+32'h12345678; 
+  #15 @(posedge clk); din = 32'h61626364; 
 end
 
 controller #(
@@ -156,6 +158,7 @@ controller #(
 	.din(din),
 	.valid_in(valid_in),
 	.new_hash_request(new_hash_request),
+	.hash_corrupt(hash_corrupt),
 	.hash_ready(hash_ready),
 	.digest_valid(digest_valid),	
 	.init(init),
@@ -163,4 +166,23 @@ controller #(
 	.final(final),				
 	.block_out(block),
 	.data_length_out(data_length));
+
+hash_engine_simulator #(
+	.BLOCK_WIDTH(BLOCK_WIDTH),
+	.DATA_LENGTH(DATA_LENGTH),
+	.DIGEST_LENGTH(DIGEST_LENGTH)
+	) U_hash_engine_simulator (
+	.clk(clk),
+	.reset_n(reset_n),
+	.init(init),
+	.next(next),
+	.final(final),
+	.block_in(block),
+	.data_length(data_length),
+	.hash_ready(hash_ready),
+	.digest_valid(digest_valid),
+	.digest(digest));
+
+
+
 endmodule
