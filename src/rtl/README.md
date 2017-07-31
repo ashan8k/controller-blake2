@@ -1,3 +1,13 @@
+Table of contents
+=================
+
+* [controller.v](#controller.v)
+ * [Usage](#Usage)
+  * [Quick start](#Quick-start)
+
+
+
+
 # controller.v
 
 This is a Verilog implementation of the Controller for BLAKE2 hash function simulator.
