@@ -1,16 +1,17 @@
 Table of contents
 =================
 
-* [controller.v](#controller.v)
+* [Controller](#controller)
   * [Usage](#usage)
     * [Quick start](#quick-start)
+* [Hash Simulator](#hash-simulator)
 
 
 
 
-# controller.v
+# Controller
 
-This is a Verilog implementation of the Controller for BLAKE2 hash function simulator.
+This is a Verilog implementation of the Controller for BLAKE2 hash function simulator. Please refer <b>controller.v</b> file
 ## Usage
 
 ### Quick start
@@ -43,6 +44,11 @@ controller #(
 	.data_length_out(data_length)        	// The byte length of the input data  to the hash engine
 );
 ```
+
+# Hash Simulator
+
+This is the Blake2b hash engine's simulator. please refer the hash_engine_simulator.v 
+
 <!--
 ## Further reading
 
