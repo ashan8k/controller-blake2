@@ -5,8 +5,8 @@ Table of contents
   * [Usage](#usage)
     * [Quick start](#quick-start)
 * [Hash Simulator](#hash-simulator)
-  * [Usage](#usage)
-    * [Quick start](#quick-start)
+  * [Usage](#usage-of-hash-engine-simulator)
+    * [Quick start](#quick-start-of-hash-engine-simulator)
 
 
 
@@ -51,9 +51,9 @@ controller #(
 
 This is the Blake2b hash engine's simulator. please refer the hash_engine_simulator.v 
 
-## Usage
+## Usage of hash engine simulator
 
-### Quick start
+### Quick start of hash engine simulator
 
 ```verilog
 hash_engine_simulator #(
