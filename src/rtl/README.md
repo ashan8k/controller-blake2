@@ -7,6 +7,7 @@ Table of contents
 * [Hash Simulator](#hash-simulator)
   * [Usage](#usage-of-hash-engine-simulator)
     * [Quick start](#quick-start-of-hash-engine-simulator)
+    * [Further reading](#further-reading)
 
 
 
@@ -49,7 +50,7 @@ controller #(
 
 # Hash Simulator
 
-This is the Blake2b hash engine's simulator. please refer the hash_engine_simulator.v 
+This is the Blake2b hash engine's simulator. please refer the <b>hash_engine_simulator.v </b>
 
 ## Usage of hash engine simulator
 
@@ -73,10 +74,9 @@ hash_engine_simulator #(
 	.digest(digest)			// The digest output
 );
 ```
-<!--
 
-## Further reading
+### Further reading
 
 - https://blake2.net/
 - https://tools.ietf.org/html/draft-saarinen-blake2
-- https://en.wikipedia.org/wiki/BLAKE_%28hash_function%29 -->
+- https://en.wikipedia.org/wiki/BLAKE_%28hash_function%29
