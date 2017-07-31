@@ -5,6 +5,8 @@ Table of contents
   * [Usage](#usage)
     * [Quick start](#quick-start)
 * [Hash Simulator](#hash-simulator)
+  * [Usage](#usage)
+    * [Quick start](#quick-start)
 
 
 
@@ -49,7 +51,30 @@ controller #(
 
 This is the Blake2b hash engine's simulator. please refer the hash_engine_simulator.v 
 
+## Usage
+
+### Quick start
+
+```verilog
+hash_engine_simulator #(
+	.BLOCK_WIDTH(BLOCK_WIDTH),	// Width of the block, if BLOCK_WIDTH = 1024, then 32 sets of BUS_WIDTH can fills the block
+	.DATA_LENGTH(DATA_LENGTH),	// Byte length of data which is feeded to hash
+	.DIGEST_LENGTH(DIGEST_LENGTH)	// The length of the digest in bytes
+) U_hash_engine_simulator (
+	.clk(clk),			// The module clock
+	.reset_n(reset_n),		// Reset (active LOW)
+	.init(init),			// Initialize the hasher (active HIGH)
+	.next(next),			// Go to the next block (if data_length > 128 bytes)
+	.final(final),			// This is the final block
+	.block_in(block),		// The 128-byte block (padded if data_length < 128 bytes)
+	.data_length(data_length),	// The byte length of the input data
+	.hash_ready(hash_ready),	// HIGH when the core is ready to hash
+	.digest_valid(digest_valid),	// HIGH when the digest output is valid
+	.digest(digest)			// The digest output
+);
+```
 <!--
+
 ## Further reading
 
 - https://blake2.net/
