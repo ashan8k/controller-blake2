@@ -2,8 +2,8 @@ Table of contents
 =================
 
 * [controller.v](#controller.v)
-  * [Usage](#Usage)
-    * [Quick start](#Quick-start)
+  * [Usage](#usage)
+    * [Quick start](#quick-start)
 
 
 
