@@ -7,7 +7,7 @@ Table of contents
 * [Hash Simulator](#hash-simulator)
   * [Usage](#usage-of-hash-engine-simulator)
     * [Quick start](#quick-start-of-hash-engine-simulator)
-    * [Further reading](#further-reading)
+  * [Further reading](#further-reading)
 
 
 
